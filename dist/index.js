@@ -1,68 +1,70 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/index.ts
+var src_exports = {};
+__export(src_exports, {
+  default: () => src_default
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const koa_router_1 = __importDefault(require("koa-router"));
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
+module.exports = __toCommonJS(src_exports);
+var import_koa_router = __toESM(require("koa-router"));
+var import_fs = __toESM(require("fs"));
+var import_path = __toESM(require("path"));
 function getAllDirs(rootPath, target = []) {
-    const files = fs_1.default.readdirSync(rootPath);
-    for (let i = 0; i < files.length; i++) {
-        const fullPath = path_1.default.join(rootPath, files[i]);
-        const stat = fs_1.default.statSync(fullPath);
-        if (stat.isDirectory() && !fullPath.includes('node_module')) {
-            target.push(fullPath);
-            getAllDirs(fullPath, target);
-        }
+  const files = import_fs.default.readdirSync(rootPath);
+  for (let i = 0; i < files.length; i++) {
+    const fullPath = import_path.default.join(rootPath, files[i]);
+    const stat = import_fs.default.statSync(fullPath);
+    if (stat.isDirectory() && !fullPath.includes("node_module")) {
+      target.push(fullPath);
+      getAllDirs(fullPath, target);
     }
-    return target;
+  }
+  return target;
 }
-function default_1(app) {
-    const rootPath = process.cwd();
-    const allDirPath = getAllDirs(rootPath);
-    const routerPath = allDirPath.find((item, index) => {
-        return /router\b/.test(item);
+function src_default(app) {
+  const rootPath = process.cwd();
+  const allDirPath = getAllDirs(rootPath);
+  const routerPath = allDirPath.find((item, index) => {
+    return /router\b/.test(item);
+  });
+  const routerDirs = import_fs.default.readdirSync(routerPath, { encoding: "utf-8" });
+  routerDirs.forEach((dir) => {
+    const _router = new import_koa_router.default({ prefix: `/${dir}` });
+    const routers = import_fs.default.readdirSync(`${routerPath}/${dir}`, { encoding: "utf-8" });
+    routers.forEach(async (router) => {
+      const fn = await import(`${routerPath}/${dir}/${router}`);
+      router = router.replace(/.ts/, "");
+      if (Array.isArray(fn.default)) {
+        _router[router]("/", ...fn.default);
+      } else if (typeof fn.default === "function") {
+        _router[router]("/", fn.default);
+      }
     });
-    const routerDirs = fs_1.default.readdirSync(routerPath, { encoding: 'utf-8' });
-    routerDirs.forEach((dir) => {
-        const _router = new koa_router_1.default({ prefix: `/${dir}` });
-        const routers = fs_1.default.readdirSync(`${routerPath}/${dir}`, { encoding: 'utf-8' });
-        routers.forEach(async (router) => {
-            const fn = await Promise.resolve().then(() => __importStar(require(`${routerPath}/${dir}/${router}`)));
-            router = router.replace(/.ts/, '');
-            if (Array.isArray(fn.default)) {
-                _router[router]('/', ...fn.default);
-            }
-            else if (typeof fn.default === 'function') {
-                _router[router]('/', fn.default);
-            }
-        });
-        app.use(_router.routes());
-    });
+    app.use(_router.routes());
+  });
 }
-exports.default = default_1;
-//# sourceMappingURL=index.js.map
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {});

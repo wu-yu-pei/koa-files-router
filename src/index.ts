@@ -5,7 +5,10 @@ import fs from 'fs';
 import path from 'path';
 
 function getAllDirs(rootPath: string, target: any = []): any {
+  // root dirs&files
   const files = fs.readdirSync(rootPath);
+
+  // each find all dir
   for (let i = 0; i < files.length; i++) {
     const fullPath = path.join(rootPath, files[i]);
     const stat = fs.statSync(fullPath);
@@ -15,6 +18,7 @@ function getAllDirs(rootPath: string, target: any = []): any {
     }
   }
 
+  // root dirs
   return target;
 }
 
@@ -23,12 +27,14 @@ export default function (app: Koa) {
 
   const allDirPath: [] = getAllDirs(rootPath);
 
+  //find roter dir
   const routerPath: any = allDirPath.find((item: any, index: number) => {
     return /router\b/.test(item);
   });
 
   const routerDirs = fs.readdirSync(routerPath, { encoding: 'utf-8' });
 
+  // init router
   routerDirs.forEach((dir) => {
     const _router: any = new KoaRouter({ prefix: `/${dir}` });
 
